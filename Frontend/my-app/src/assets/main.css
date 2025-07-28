@@ -35,7 +35,14 @@ body{
   color: black;
 }
 /* FileCard.css */
-
+.file-card-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap; /* Ensures wrapping on smaller screens */
+  justify-content: start;
+  gap: 20px; /* Spacing between cards */
+  padding: 20px;
+}
 .file-card {
     display: flex;
     flex-direction: column;

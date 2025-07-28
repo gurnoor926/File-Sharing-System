@@ -82,7 +82,7 @@ function File(){
     fetchData();
   },[token,decoded.exp])
     return(
-        <div>
+        <div className="file-card-container">
           {data.map(createFile)}
         </div>
     )
