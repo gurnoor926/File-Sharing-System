@@ -23,7 +23,7 @@ const storage = multer.diskStorage({
     cb(null, file.originalname); // use original filename (not recommended for production)
   },
 });
-const saltRounds = process.env.SALT_ROUNDS;
+const saltRounds = parseInt(process.env.SALT_ROUNDS);
 const JWT_Secret = process.env.JWT_SECRET;
 // Create multer instance
 const upload = multer({ storage: storage });
