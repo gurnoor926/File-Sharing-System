@@ -68,7 +68,7 @@ function User_files(){
     fetchData();
   },[token])
     return(
-        <div className="file-ca-container">
+        <div className="file-card-container">
           {data.map(createFile)}
         </div>
     )
