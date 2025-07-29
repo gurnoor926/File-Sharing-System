@@ -49,7 +49,7 @@ function authenticateToken(req,res,next){
      next();
   })
 }
-app.get("/users", async (req, res) => {
+/* app.get("/users", async (req, res) => {
   try {
     const response = await db.query("SELECT * FROM users");
     const data = res.json(response.rows);
@@ -57,7 +57,7 @@ app.get("/users", async (req, res) => {
   } catch (error) {
     console.error(error);
   }
-});
+}); */
 app.post("/login", upload.none(), async (req, res) => {
   console.log(req.body);
   const email = req.body.email;
