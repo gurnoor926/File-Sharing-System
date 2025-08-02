@@ -39,19 +39,6 @@ const db = new pg.Client({
   port: process.env.DB_PORT,
 });
 db.connect();
-/*  function authenticateToken(req,res,next){
-  const token = req.headers.authorization?.split(' ')[1];
-  if(!token){
-    return res.status(401).json({message:"Unauthorized"})
-  }
-  jwt.verify(token,JWT_Secret,(err,user)=>{
-    if(err){
-      return res.status(403).json({message:"Forbidden"})
-    }
-    req.user = user;
-     next();
-  })
-} */
 app.post("/login", upload.none(),formData , async (req, res) => {
   console.log(req.body);
   const {email,password} = req.cleanedData;
