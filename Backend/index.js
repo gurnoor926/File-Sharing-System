@@ -2,11 +2,14 @@ import express from "express";
 import pg from "pg";
 import cors from "cors";
 import multer from "multer";
-import bycrpt from "bcrypt";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import path from "path";
 import { fileURLToPath } from 'url';
 import  env, { configDotenv } from "dotenv";
+import authenticateToken from "./middlewares/authenticateToken.js";
+import formData from "./middlewares/formData.js";
+import fileData from "./middlewares/fileData.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,7 +39,7 @@ const db = new pg.Client({
   port: process.env.DB_PORT,
 });
 db.connect();
-function authenticateToken(req,res,next){
+/*  function authenticateToken(req,res,next){
   const token = req.headers.authorization?.split(' ')[1];
   if(!token){
     return res.status(401).json({message:"Unauthorized"})
@@ -48,20 +51,10 @@ function authenticateToken(req,res,next){
     req.user = user;
      next();
   })
-}
-/* app.get("/users", async (req, res) => {
-  try {
-    const response = await db.query("SELECT * FROM users");
-    const data = res.json(response.rows);
-    console.log(data);
-  } catch (error) {
-    console.error(error);
-  }
-}); */
-app.post("/login", upload.none(), async (req, res) => {
+} */
+app.post("/login", upload.none(),formData , async (req, res) => {
   console.log(req.body);
-  const email = req.body.email;
-  const password = req.body.password;
+  const {email,password} = req.cleanedData;
   try {
     const result = await db.query(
       "select * from users where email = $1 ",
@@ -71,7 +64,7 @@ app.post("/login", upload.none(), async (req, res) => {
     if (result.rows.length === 1) {
       const user = result.rows[0];
       const storedPassword = user.password_hash;
-      const isMatch= await bycrpt.compare(password,storedPassword);
+      const isMatch= await bcrypt.compare(password,storedPassword);
       if(isMatch){
       const token = jwt.sign({ email: user.email, id: user.id }, JWT_Secret, {
           expiresIn: process.env.JWT_EXPIRES,
@@ -88,19 +81,17 @@ app.post("/login", upload.none(), async (req, res) => {
     console.log(err);
   }
 });
-app.post("/register", upload.none(), async (req, res) => {
+app.post("/register", upload.none(),formData, async (req, res) => {
  /*  console.log(req.body); */
-  const username = req.body.name;
-  const email = req.body.email;
-  const password = req.body.password;
-  bycrpt.hash(password,saltRounds , async(err, hash) => {
+ const { name, email, password } = req.cleanedData;
+  bcrypt.hash(password,saltRounds , async(err, hash) => {
     if (err){
       console.error(err);
     }else{
       try {
     const response = await db.query(
       "insert into users(name,email,password_hash) values($1,$2,$3) returning *",
-      [username, email, hash]
+      [name, email, hash]
     );
     const user = response.rows[0]
     const token = jwt.sign({ email: user.email, id: user.id }, JWT_Secret, {
@@ -114,14 +105,11 @@ app.post("/register", upload.none(), async (req, res) => {
     }
     });
 });
-app.post("/upload_files",authenticateToken, upload.single("file"), async (req, res) => {
+app.post("/upload_files",authenticateToken, upload.single("file"),fileData, async (req, res) => {
   /* console.log(req.file);
   console.log(req.body);
   console.log(req.file.path); */
-  const filename = req.body.filename;
-  const filePath = req.file.path;
-  const description = req.body.description;
-  const userId = req.user.id;
+ const { filename, filePath, description, userId } = req.fileData;
   /* console.log(userId) */
 
   try {
