@@ -12,7 +12,7 @@ function Register() {
     formData.append("email", email);
     formData.append("password", password);
     try {
-      const res = await axios.post("http://localhost:3000/register", formData);
+      const res = await axios.post("https://file-sharing-system-eoax.onrender.com/register", formData);
       console.log(res);
       if (res.data.success) {
         localStorage.setItem("token", res.data.token);

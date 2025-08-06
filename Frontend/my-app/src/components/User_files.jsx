@@ -55,7 +55,7 @@ function User_files(){
       const decoded = jwtDecode(token);
     const fetchData = async () => {
       try{
-        const response = await axios.get(`http://localhost:3000/user_uploads/${decoded.id}`,{
+        const response = await axios.get(`https://file-sharing-system-eoax.onrender.com/user_uploads/${decoded.id}`,{
             headers:{
                 'Authorization': `Bearer ${token}`
             }

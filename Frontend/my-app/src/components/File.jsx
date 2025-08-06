@@ -22,7 +22,7 @@ async function handleDownload(e) {
   console.log(filename)
 
   try {
-    const response = await axios.get(`http://localhost:3000/file/${filename}`, {
+    const response = await axios.get(`https://file-sharing-system-eoax.onrender.com/file/${filename}`, {
       responseType: "blob", // Important for downloading files
       headers: {
         Authorization: `Bearer ${token}`,

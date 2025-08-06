@@ -32,7 +32,7 @@ function FileUpload() {
     formData.append("userId", userId); 
 
     try {
-      const res = await axios.post("http://localhost:3000/upload_files", formData, {
+      const res = await axios.post("https://file-sharing-system-eoax.onrender.com/upload_files", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

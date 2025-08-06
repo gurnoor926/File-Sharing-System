@@ -12,7 +12,7 @@ function Login() {
     formData.append("email", email);
     formData.append("password", password);
     try {
-      const res = await axios.post("http://localhost:3000/login", formData);
+      const res = await axios.post("https://file-sharing-system-eoax.onrender.com/login", formData);
       console.log(res.data);
 
       if (res.data.success) {
