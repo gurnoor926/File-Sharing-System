@@ -32,11 +32,8 @@ const JWT_Secret = process.env.JWT_SECRET;
 const upload = multer({ storage: storage });
 app.use(cors());
 const db = new pg.Client({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
+  connectionString : process.env.DATABASE_URL,
+  ssl:{rejectUnauthorized:false}
 });
 db.connect();
 app.post("/login", upload.none(),formData , async (req, res) => {
