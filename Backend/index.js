@@ -30,7 +30,9 @@ const saltRounds = parseInt(process.env.SALT_ROUNDS);
 const JWT_Secret = process.env.JWT_SECRET;
 // Create multer instance
 const upload = multer({ storage: storage });
-app.use(cors());
+app.use(cors({
+  origin: "https://sendora-ybt9.onrender.com",
+}));
 const db = new pg.Client({
   connectionString : process.env.DATABASE_URL,
   ssl:{rejectUnauthorized:false}
