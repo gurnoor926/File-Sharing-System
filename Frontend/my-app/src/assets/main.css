@@ -242,7 +242,7 @@ body{
 
 @media (max-width: 480px) {
   .file-card {
-    max-width: 100%;
+    max-width: 90%;
   }
 
   .file-title {
@@ -253,7 +253,8 @@ body{
     font-size: 14px;
   }
   .file-meta{
-    flex-direction: row;
+    flex-direction: column;
+    gap: 2px;
     justify-content: space-between;
   }
 
