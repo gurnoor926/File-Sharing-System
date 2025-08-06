@@ -69,7 +69,7 @@ function File(){
         if(!token)return;
     const fetchData = async () => {
       try{
-        const response = await axios.get('http://localhost:3000/files',{
+        const response = await axios.get('https://file-sharing-system-eoax.onrender.com/files',{
             headers:{
                 'Authorization': `Bearer ${token}`
             }
