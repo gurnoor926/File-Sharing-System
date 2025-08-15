@@ -8,7 +8,7 @@ function createFile(file){
         id={file.id}
         name={file.filename}
         description={file.description}
-        filepath={file.filepath.split(/[/\\]/).pop()}
+        filepath={file.file_url}
         uploaded_by={file.uploaded_by}
         created_at={new Date(file.created_at).toLocaleDateString()}/>
     )
@@ -16,37 +16,7 @@ function createFile(file){
 function Files(props){
 async function handleDownload(e) {
   e.preventDefault();
-
-  const token = localStorage.getItem("token");
-  const filename = props.filepath.split(/[/\\]/).pop();
-  console.log(filename)
-
-  try {
-    const response = await axios.get(`https://file-sharing-system-eoax.onrender.com/file/${filename}`, {
-      responseType: "blob", // Important for downloading files
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    // Create a blob URL
-    const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
-
-    // Create a link and simulate click
-    const link = document.createElement("a");
-    link.href = blobUrl;
-    link.setAttribute("download", filename);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-
-    // Optionally revoke the blob after download
-    setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
-
-  } catch (error) {
-    console.error("Download failed:", error);
-    alert("Failed to download file. Please check your permissions or token.");
-  }
+  window.open(props.filepath, "_blank");
 }
 
 return(

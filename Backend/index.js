@@ -10,6 +10,7 @@ import  env, { configDotenv } from "dotenv";
 import authenticateToken from "./middlewares/authenticateToken.js";
 import formData from "./middlewares/formData.js";
 import fileData from "./middlewares/fileData.js";
+import bucket from "./firebase.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,7 +30,7 @@ const storage = multer.diskStorage({
 const saltRounds = parseInt(process.env.SALT_ROUNDS);
 const JWT_Secret = process.env.JWT_SECRET;
 // Create multer instance
-const upload = multer({ storage: storage });
+const upload = multer({ storage: multer.memoryStorage() });
 app.use(cors({
   origin: "https://sendora-ybt9.onrender.com",
 }));
@@ -95,13 +96,25 @@ app.post("/upload_files",authenticateToken, upload.single("file"),fileData, asyn
   /* console.log(req.file);
   console.log(req.body);
   console.log(req.file.path); */
- const { filename, filePath, description, userId } = req.fileData;
+ const { filename, description, userId } = req.fileData;
   /* console.log(userId) */
-
+  const blob = bucket.file(file.originalname);
+  const blobStream = blob.createWriteStream({
+    metadata:{
+      contentType: file.mimetype,
+    }
+  })
+    blobStream.on('error',(err)=>{
+      console.log(err);
+      res.status(500).send("upload failed");
+    })
+    blobStream.on('finish',async()=>{
+      const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+    })
   try {
     const result = await db.query(
       "INSERT INTO files (filename, filepath , description,uploaded_by) VALUES ($1, $2, $3,$4) returning *",
-      [filename, filePath, description, userId]
+      [filename, publicUrl, description, userId]
     );
     /* console.log(result.rows[0]); */
     if(result.rows.length >0){
@@ -133,17 +146,28 @@ app.get("/user_uploads/:id",authenticateToken, async(req,res)=>{
     console.error(error)
   }
 });
-app.get("/file/:filename", authenticateToken, (req, res) => {
-  const filename = req.params.filename;
-  const filePath = path.join(__dirname, "uploads", filename);
-  console.log(filePath)
-  res.download(filePath, filename, (err) => {
-    if (err) {
-      /* console.log("Error in download:", err); */
-      res.status(404).send("File not found");
+app.get("/file/:filename", authenticateToken, async (req, res) => {
+  try {
+    const filename = req.params.filename;
+
+    // Get file info from DB
+    const result = await db.query(
+      "SELECT file_url FROM files WHERE filename = $1",
+      [filename]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).send("File not found in database");
     }
-  });
+
+    const fileUrl = result.rows[0].file_url; // This is the Firebase public URL
+    return res.redirect(fileUrl); // Redirect to Firebase URL so browser downloads it
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
 });
+
 app.delete("/delete_file/:id",authenticateToken, async (req,res)=>{
   const id = req.params.id;
   try {
