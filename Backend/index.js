@@ -12,7 +12,7 @@ import formData from "./middlewares/formData.js";
 import fileData from "./middlewares/fileData.js";
 import bucket from "./firebase.js";
 import fetch from "node-fetch";
-
+import { getStorage } from "firebase-admin/storage";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -169,36 +169,18 @@ app.get("/user_uploads/:id",authenticateToken, async(req,res)=>{
 app.get("/file/:filename", authenticateToken, async (req, res) => {
   try {
     const filename = req.params.filename;
-
-    const result = await db.query(
-      "SELECT filepath FROM files WHERE filename = $1",
-      [filename]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).send("File not found in database");
-    }
-
-    const fileUrl = result.rows[0].filepath; // Firebase public URL
-
-    // Fetch from Firebase
-    const firebaseRes = await fetch(fileUrl);
-    if (!firebaseRes.ok) {
-      return res.status(firebaseRes.status).send("Failed to fetch file");
-    }
-
-    const ext = path.extname(filename).toLowerCase();
+    const bucket = getStorage().bucket();
+    const file = bucket.file(filename);
 
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-    res.setHeader(
-      "Content-Type",
-      firebaseRes.headers.get("content-type") || "application/octet-stream"
-    );
-
-    firebaseRes.body.pipe(res);
-
+    file.createReadStream()
+      .on("error", (err) => {
+        console.error("Download error:", err);
+        res.status(500).send("Download failed");
+      })
+      .pipe(res);
   } catch (err) {
-    console.error(err);
+    console.error("Error streaming file:", err);
     res.status(500).send("Server error");
   }
 });
