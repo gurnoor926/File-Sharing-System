@@ -1,7 +1,7 @@
 import admin from 'firebase-admin';
 import {readFileSync} from 'fs';
 const serviceAccount = JSON.parse(
-    readFileSync(new URL('./sendoraDownload.json',import.meta.url))
+    process.env.FIREBASE_SERVICE_ACCOUNT
 );
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
