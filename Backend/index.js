@@ -20,7 +20,7 @@ env.config();
 
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname,'../Frontend/my-app/dist')));
+app.use(express.static(path.join(__dirname,'../Frontend/my-app/dist'), { fallthrough: false }));
 const port = process.env.PORT;
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
