@@ -8,7 +8,7 @@ function createFile(file){
         id={file.id}
         name={file.filename}
         description={file.description}
-        filepath={file.file_url}
+        filepath={file.filepath}
         uploaded_by={file.uploaded_by}
         created_at={new Date(file.created_at).toLocaleDateString()}/>
     )
@@ -52,7 +52,6 @@ async function handleDownload(e) {
       alert("Failed to download file.");
     }
   }
-}
 
 return(
         <div className="file-card">
