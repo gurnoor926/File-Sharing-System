@@ -21,7 +21,7 @@ function Register() {
           text: "User Registered Successfully",
           icon: "success",
         });
-        window.location.reload();
+        window.location.href = '/';
       } else {
        await Swal.fire({
           icon: "error",
