@@ -20,7 +20,7 @@ async function handleDownload(e) {
 
     try {
       // Call backend route that forces download
-      const downloadUrl = `https://file-sharing-system-eoax.onrender.com/file/${encodeURIComponent(props.name)}`;
+      const downloadUrl = `https://file-sharing-system-eoax.onrender.com/file/${encodeURIComponent(props.filepath)}`;
       const response = await fetch(downloadUrl, {
         method: "GET",
         headers: {
