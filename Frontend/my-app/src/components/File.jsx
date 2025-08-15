@@ -30,7 +30,7 @@ return(
           <h1 className="file-title">{props.name}</h1>
         <h2 className="file-description">{props.description}</h2>
         <div className="file-meta">
-          <h4 className="file-path">{props.filepath}</h4>
+          <h4 className="file-path">{props.filepath.split(/[/\\]/).pop()}</h4>
         <h5 className="file-date">{props.created_at}</h5>
         </div>
         <button onClick={handleDownload} className="download-button">Download</button>
