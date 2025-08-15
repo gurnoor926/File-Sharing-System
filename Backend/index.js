@@ -198,7 +198,13 @@ app.delete("/delete_file/:id",authenticateToken, async (req,res)=>{
     console.error(error);
   }
 });
-app.get('/*',(req,res)=>{
-  res.sendFile(path.join(__dirname,'../Frontend/my-app/dist','index.html'))
-})
+app.get('*', (req, res) => {
+  const indexPath = path.join(__dirname, '../Frontend/my-app/dist', 'index.html');
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      console.error('Error sending index.html:', err);
+      res.status(500).send('Server error');
+    }
+  });
+});
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
