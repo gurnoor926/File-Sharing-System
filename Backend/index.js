@@ -11,7 +11,8 @@ import authenticateToken from "./middlewares/authenticateToken.js";
 import formData from "./middlewares/formData.js";
 import fileData from "./middlewares/fileData.js";
 import bucket from "./firebase.js";
-import fetch from "node-fetch"; 
+import fetch from "node-fetch";
+ import path from "path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -169,9 +170,8 @@ app.get("/file/:filename", authenticateToken, async (req, res) => {
   try {
     const filename = req.params.filename;
 
-    // Get file info from DB
     const result = await db.query(
-      "SELECT file_url FROM files WHERE filename = $1",
+      "SELECT filepath FROM files WHERE filename = $1",
       [filename]
     );
 
@@ -179,31 +179,29 @@ app.get("/file/:filename", authenticateToken, async (req, res) => {
       return res.status(404).send("File not found in database");
     }
 
-    const fileUrl = result.rows[0].filepath;// This is the Firebase public URL
-    const response = await fetch(fileUrl);
-    if (!response.ok) {
-      return res.status(404).send("File not found on storage");
+    const fileUrl = result.rows[0].filepath; // Firebase public URL
+
+    // Fetch from Firebase
+    const firebaseRes = await fetch(fileUrl);
+    if (!firebaseRes.ok) {
+      return res.status(firebaseRes.status).send("Failed to fetch file");
     }
 
-    // Set download headers
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="${filename}"`
-    );
+    const ext = path.extname(filename).toLowerCase();
+
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
     res.setHeader(
       "Content-Type",
-      response.headers.get("content-type") || "application/octet-stream"
+      firebaseRes.headers.get("content-type") || "application/octet-stream"
     );
 
-    // Pipe the file to the client
-    response.body.pipe(res);
+    firebaseRes.body.pipe(res);
 
   } catch (err) {
     console.error(err);
     res.status(500).send("Server error");
   }
 });
-
 app.delete("/delete_file/:id",authenticateToken, async (req,res)=>{
   const id = req.params.id;
   try {
