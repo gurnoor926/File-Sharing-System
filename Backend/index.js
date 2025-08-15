@@ -168,7 +168,7 @@ app.get("/user_uploads/:id",authenticateToken, async(req,res)=>{
 });
 app.get("/file/:filename", authenticateToken, async (req, res) => {
   try {
-    const filename = req.params.filename;
+    const filename = req.params.filepath;
     const bucket = getStorage().bucket();
     const file = bucket.file(filename);
 
