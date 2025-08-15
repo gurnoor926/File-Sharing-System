@@ -92,41 +92,56 @@ app.post("/register", upload.none(),formData, async (req, res) => {
     }
     });
 });
-app.post("/upload_files",authenticateToken, upload.single("file"),fileData, async (req, res) => {
-  /* console.log(req.file);
-  console.log(req.body);
-  console.log(req.file.path); */
- const { filename, description, userId } = req.fileData;
-  /* console.log(userId) */
-  const blob = bucket.file(file.originalname);
-  const blobStream = blob.createWriteStream({
-    metadata:{
-      contentType: file.mimetype,
-    }
-  })
-    blobStream.on('error',(err)=>{
-      console.log(err);
-      res.status(500).send("upload failed");
-    })
-    blobStream.on('finish',async()=>{
-      const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-    })
+app.post("/upload_files", authenticateToken, upload.single("file"), fileData, async (req, res) => {
   try {
-    const result = await db.query(
-      "INSERT INTO files (filename, filepath , description,uploaded_by) VALUES ($1, $2, $3,$4) returning *",
-      [filename, publicUrl, description, userId]
-    );
-    /* console.log(result.rows[0]); */
-    if(result.rows.length >0){
-        res.json({success:true, file:result.rows[0]});
+    const { filename, description, userId } = req.fileData;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ success: false, message: "No file uploaded" });
     }
-    else{
-        res.json({success:false});
-    }
+
+    // Create a Firebase Storage blob reference
+    const blob = bucket.file(file.originalname);
+    const blobStream = blob.createWriteStream({
+      metadata: {
+        contentType: file.mimetype,
+      },
+    });
+
+    blobStream.on("error", (err) => {
+      console.error("Upload error:", err);
+      return res.status(500).json({ success: false, message: "File upload failed" });
+    });
+
+    blobStream.on("finish", async () => {
+      const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+
+      try {
+        const result = await db.query(
+          "INSERT INTO files (filename, filepath, description, uploaded_by) VALUES ($1, $2, $3, $4) RETURNING *",
+          [filename, publicUrl, description, userId]
+        );
+
+        if (result.rows.length > 0) {
+          return res.json({ success: true, file: result.rows[0] });
+        } else {
+          return res.json({ success: false });
+        }
+      } catch (dbError) {
+        console.error("Database error:", dbError);
+        return res.status(500).json({ success: false, message: "Database insert failed" });
+      }
+    });
+
+    // Start uploading to Firebase
+    blobStream.end(file.buffer);
   } catch (error) {
-    console.error(error);
+    console.error("Route error:", error);
+    res.status(500).json({ success: false, message: "Unexpected server error" });
   }
 });
+
 app.get("/files", authenticateToken, async (req, res) => {
   try{
     const result = await db.query("SELECT * FROM files");
