@@ -18,7 +18,7 @@ function User_file(props){
     e.preventDefault();
        const token = localStorage.getItem('token');
         try {
-            const response = await axios.delete(`https://file-sharing-system-eoax.onrender.com/${props.id}`,{
+            const response = await axios.delete(`https://file-sharing-system-eoax.onrender.com/delete_file/${props.id}`,{
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
