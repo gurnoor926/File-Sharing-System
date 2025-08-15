@@ -115,9 +115,12 @@ app.post("/upload_files", authenticateToken, upload.single("file"), fileData, as
     });
 
     blobStream.on("finish", async () => {
+      
+      try {
+        await blob.makePublic();
       const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
 
-      try {
+      
         const result = await db.query(
           "INSERT INTO files (filename, filepath, description, uploaded_by) VALUES ($1, $2, $3, $4) RETURNING *",
           [filename, publicUrl, description, userId]
@@ -175,7 +178,7 @@ app.get("/file/:filename", authenticateToken, async (req, res) => {
       return res.status(404).send("File not found in database");
     }
 
-    const fileUrl = result.rows[0].file_url; // This is the Firebase public URL
+    const fileUrl = result.rows[0].filepath; // This is the Firebase public URL
     return res.redirect(fileUrl); // Redirect to Firebase URL so browser downloads it
   } catch (err) {
     console.error(err);
