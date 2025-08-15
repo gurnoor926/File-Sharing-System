@@ -11,6 +11,7 @@ import authenticateToken from "./middlewares/authenticateToken.js";
 import formData from "./middlewares/formData.js";
 import fileData from "./middlewares/fileData.js";
 import bucket from "./firebase.js";
+import fetch from "node-fetch"; 
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -178,8 +179,25 @@ app.get("/file/:filename", authenticateToken, async (req, res) => {
       return res.status(404).send("File not found in database");
     }
 
-    const fileUrl = result.rows[0].filepath; // This is the Firebase public URL
-    return res.redirect(fileUrl); // Redirect to Firebase URL so browser downloads it
+    const fileUrl = result.rows[0].filepath;// This is the Firebase public URL
+    const response = await fetch(fileUrl);
+    if (!response.ok) {
+      return res.status(404).send("File not found on storage");
+    }
+
+    // Set download headers
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${filename}"`
+    );
+    res.setHeader(
+      "Content-Type",
+      response.headers.get("content-type") || "application/octet-stream"
+    );
+
+    // Pipe the file to the client
+    response.body.pipe(res);
+
   } catch (err) {
     console.error(err);
     res.status(500).send("Server error");
