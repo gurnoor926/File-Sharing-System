@@ -14,35 +14,16 @@ function createFile(file){
     )
 }
 function Files(props){
-async function handleDownload(e) {
+function handleDownload(e) {
   e.preventDefault();
- try {
-    // Directly use the public Firebase URL
-    const response = await fetch(props.filepath);
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch file");
-    }
-
-    // Turn response into a blob
-    const blob = await response.blob();
-    const blobUrl = window.URL.createObjectURL(blob);
-
-    // Create temp link to trigger browser download
-    const link = document.createElement("a");
-    link.href = blobUrl;
-    link.download = props.name;
-    document.body.appendChild(link);
-    link.click();
-
-    // Cleanup
-    link.remove();
-    window.URL.revokeObjectURL(blobUrl);
-
-  } catch (error) {
-    console.error("Download error:", error);
-    alert("Failed to download file.");
-  }
+  // Create a temporary <a> tag for download
+  const link = document.createElement("a");
+  link.href = props.filepath; // Direct Firebase Storage URL
+  link.download = props.name; // Suggested file name
+  document.body.appendChild(link);
+  link.click();
+  link.remove(); // Clean up
 }
 return(
         <div className="file-card">
