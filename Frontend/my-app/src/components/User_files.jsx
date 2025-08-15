@@ -26,7 +26,7 @@ function User_file(props){
             console.log(response.data);
             if(response.data.success){
                 alert("File deleted");
-                window.location.href = "/user_files";
+                window.location.href = "/";
             }else{
                 alert("Error deleting file");
             }

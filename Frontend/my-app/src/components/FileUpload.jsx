@@ -15,7 +15,7 @@ function FileUpload() {
       const decodedToken = jwtDecode(token);
       if(decodedToken.exp < Date.now()/1000){
           localStorage.removeItem('token');
-          window.location.href = '/fileupload';
+          window.location.href = '/';
         }
       setUserId(decodedToken.id);
     }
