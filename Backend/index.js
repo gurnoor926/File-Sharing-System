@@ -20,6 +20,7 @@ env.config();
 
 const app = express();
 app.use(express.json());
+app.use(express.static(path.join(__dirname,'../Frontend/my-app/dist')));
 const port = process.env.PORT;
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -196,5 +197,8 @@ app.delete("/delete_file/:id",authenticateToken, async (req,res)=>{
   } catch (error) {
     console.error(error);
   }
+});
+app.get('*',(req,res)=>{
+  res.sendFile(path.join(__dirname,'../Frontend/my-app/dist','index.html'));
 })
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
