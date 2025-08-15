@@ -16,43 +16,34 @@ function createFile(file){
 function Files(props){
 async function handleDownload(e) {
   e.preventDefault();
-  const token = localStorage.getItem("token");
+ try {
+    // Directly use the public Firebase URL
+    const response = await fetch(props.filepath);
 
-    try {
-      // Call backend route that forces download
-      const downloadUrl = `https://file-sharing-system-eoax.onrender.com/file/${encodeURIComponent(props.filepath)}`;
-      const response = await fetch(downloadUrl, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to download file");
-      }
-
-      // Turn response into a blob
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-
-      // Create temp link to trigger browser download
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = props.name;
-      document.body.appendChild(link);
-      link.click();
-
-      // Cleanup
-      link.remove();
-      window.URL.revokeObjectURL(blobUrl);
-
-    } catch (error) {
-      console.error("Download error:", error);
-      alert("Failed to download file.");
+    if (!response.ok) {
+      throw new Error("Failed to fetch file");
     }
-  }
 
+    // Turn response into a blob
+    const blob = await response.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+
+    // Create temp link to trigger browser download
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = props.name;
+    document.body.appendChild(link);
+    link.click();
+
+    // Cleanup
+    link.remove();
+    window.URL.revokeObjectURL(blobUrl);
+
+  } catch (error) {
+    console.error("Download error:", error);
+    alert("Failed to download file.");
+  }
+}
 return(
         <div className="file-card">
           <h1 className="file-title">{props.name}</h1>
